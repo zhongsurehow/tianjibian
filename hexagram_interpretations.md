@@ -353,6 +353,7 @@
                 "status_id": "MONTORIAL_FOG",
                 "duration": 1,
                 "value": {
+                  "teach_effect": {},
                   "discipline_effect": { "action": "LOSE_RESOURCE", "params": { "target": "EVENT_SOURCE_PLAYER", "resource": "health", "value": 8 } }
                 }
               }
@@ -371,6 +372,7 @@
                 "status_id": "MONTORIAL_FOG",
                 "duration": 1,
                 "value": {
+                  "teach_effect": {},
                   "discipline_effect": { "action": "COPY_EFFECT", "params": { "target": "OPPONENT_CHOICE_SINGLE", "source_effect": { "type": "INTERRUPTED_EFFECT" } } }
                 }
               }
@@ -494,7 +496,7 @@
         "name": "退让",
         "effect": {
           "actions": [
-            { "action": "TRIGGER_EVENT", "params": { "event_id": "EVENT_SONG", "participants": ["SELF", "OPPONENT_CHOICE_SINGLE"], "modifications": { "SELF_LOSS_MODIFIER": {"op": "MULTIPLY", "value": 0.5} } } }
+            { "action": "TRIGGER_EVENT", "params": { "event_id": "EVENT_SONG", "participants": ["SELF", "OPPONENT_CHOICE_SINGLE"], "modifications": { "SELF_LOSS_MODIFIER": { "resource": "gold", "op": "MULTIPLY", "value": 0.5 } } } }
           ]
         }
       },
@@ -3511,7 +3513,7 @@
 ---
 ### **第六十三卦：《既济》 ☵☲ - 功成**
 **核心机制：【水火既济】**
-- **效果：** 若你的阴阳指示条为0且五行资源平衡，你获得100胜利点。每场游戏只能成功宣告一次。
+- **效果：** 若你的阴阳指示条为0且五行资源平衡，你获得100胜利点和30金币。每场游戏只能成功宣告一次。
 - **爻辞变量：**
   - **地部:** 宣告成功时，获得100胜利点和30金币。
   - **人部:** 宣告成功时，获得100胜利点和30金币。

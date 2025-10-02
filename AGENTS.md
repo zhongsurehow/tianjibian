@@ -40,6 +40,12 @@
 
 ---
 
+### 3.5 开发与实现备注 (Development & Implementation Notes)
+
+- **卡牌数据文件位置 (Card Data File Locations)**: `basic`, `function`, `natal`, 和 `destiny` 类型的卡牌，其生成的JSON数据文件直接存放于 `assets/data/cards/` 下对应的子目录中。而 `celestial`, `stem`, 和 `branch` 类型的卡牌（统称为“状态牌”），其JSON数据文件存放在一个额外的 `state` 子目录中，路径为 `assets/data/cards/state/`。
+
+---
+
 ## 4. 设计演化流程 (Design Evolution Process) - V2.0 新增
 
 为了让约束体系保持生命力，所有对核心约束文件的修改，都必须遵循以下流程。

@@ -13,6 +13,35 @@
 
 ## 2. 顶层结构 (Top-Level Structure) - 已扩展
 
+### 2.1 必选顶层键 (Required Top-Level Keys)
+所有卡牌定义 **必须** 包含以下键：
+- `id`: 卡牌的唯一标识符。
+- `name`: 卡牌的显示名称。
+- `type`: 卡牌的类型 (见 2.3 节)。
+
+### 2.2 可选顶层键 (Allowed Top-Level Keys)
+除了必选键外，卡牌还可以包含以下可选键：
+- `symbol`
+- `sequence`
+- `pinyin`
+- `strokes`
+- `core_mechanism`
+- `effect`
+- `triggers`
+- `usage_limit`
+- `metadata`
+
+### 2.3 合法卡牌类型 (Valid Card Types)
+`type` 字段的值必须是以下之一：
+- `basic`
+- `function`
+- `natal`
+- `destiny`
+- `stem`
+- `branch`
+- `celestial`
+
+### 2.4 结构示例
 ```json
 {
   "id": "basic_01_qian",
@@ -78,6 +107,9 @@
 | `ON_PLAYER_ACTION` | 当任一玩家执行特定动作时 | `action_type`: `MOVE`, `PLAY_CARD_FUNCTION`, `ATTACK` |
 | `ON_PHASE_START` | 在某个游戏阶段开始时 | `phase`: `UPKEEP`, `MOVEMENT`, `INTERPRETATION` |
 | `ON_RESOURCE_CHANGE`| 当玩家资源变化时 | `resource`: `gold`, `health`; `change_type`: `GAIN`, `LOSS` |
+| `ON_GAME_START` | 在游戏开始时（本命卦专用） | |
+| `ON_GAIN_RESOURCE` | 当玩家获得特定资源时 | `resource`: `gold` |
+| `ON_CAUSE_LOSS` | 当你导致其他玩家损失资源时 | `resource`: `gold`, `health` |
 
 ---
 

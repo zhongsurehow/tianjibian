@@ -24,6 +24,7 @@
                 ],
                 "modifications": {
                   "SELF_LOSS_MODIFIER": {
+                    "resource": "gold",
                     "op": "MULTIPLY",
                     "value": 0.5
                   }

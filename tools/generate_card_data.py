@@ -212,7 +212,10 @@ def generate_card_files(cards: List[Dict[str, Any]], base_output_path: Path):
         card_id = card["id"]
 
         if card_type in STATE_CARD_TYPES:
-            subfolder_name = "celestial" if card_type == "celestial" else f"{card_type}s"
+            if card_type == "branch":
+                subfolder_name = "branches"
+            else:
+                subfolder_name = "celestial" if card_type == "celestial" else f"{card_type}s"
             output_path = base_output_path / "state" / subfolder_name
         else:
             output_path = base_output_path / card_type

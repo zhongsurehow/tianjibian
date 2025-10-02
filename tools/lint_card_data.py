@@ -11,56 +11,87 @@ SCRIPT_DIR = Path(__file__).parent.resolve()
 ROOT_DIR = SCRIPT_DIR.parent
 DEFAULT_SCHEMA_PATH = ROOT_DIR / "card_logic_schema.md"
 
-def load_actions_from_schema(schema_path: Path) -> Set[str]:
-    """Parses the schema file to extract all valid action names."""
-    print(f"Loading actions from schema: {schema_path.name}")
+def load_definitions_from_schema(schema_path: Path) -> Dict[str, Set[str]]:
+    """
+    Parses the schema markdown file to extract all validation rule sets using robust,
+    section-specific regular expressions.
+    """
+    definitions = {
+        "required_keys": set(),
+        "allowed_keys": set(),
+        "card_types": set(),
+        "actions": set(),
+        "triggers": set(),
+    }
+    print(f"--- Loading all definitions from schema: {schema_path.name} ---")
+
     try:
         content = schema_path.read_text(encoding="utf-8")
-        action_table_match = re.search(
-            r"## 4\. 动作 \(Action\).*?\| 类型.*?\|(.*?)^---", content, re.S | re.M
-        )
-        if not action_table_match:
-            print("  [Error] Could not find the Action table in the schema file.", file=sys.stderr)
-            return set()
 
-        table_content = action_table_match.group(1)
-        # V3.1: Use the more robust regex to find actions in the markdown table.
-        actions = {
-            action.strip()
-            for action in re.findall(r"\|\s*`([A-Z_]+)`\s*\|", table_content)
-        }
-        print(f"  Successfully loaded {len(actions)} valid actions from schema.")
-        return actions
+        # Parser for Markdown lists under a specific "###" header.
+        # Anchors to the start of a line to be more robust.
+        def _parse_md_list(header: str) -> Set[str]:
+            match = re.search(rf"### \d\.\d {header}(.*?)(?:###|##|\Z)", content, re.S)
+            if not match:
+                print(f"Warning: Could not find list section for '{header}'", file=sys.stderr)
+                return set()
+            # This regex finds list items like "- `item`" or "- item" at the start of a line.
+            return {item.strip() for item in re.findall(r"^\s*-\s*`?([\w_]+)`?", match.group(1), re.M)}
+
+        # Parser for the main "Actions" table under a "## 4." header.
+        def _parse_actions_table() -> Set[str]:
+            match = re.search(r"## 4\. 动作 \(Action\).*?\|.*?\n\|[-|: ]+\n(.*?)(?:---|\Z)", content, re.S)
+            if not match:
+                print("Warning: Could not find Actions table", file=sys.stderr)
+                return set()
+            return {item.strip() for item in re.findall(r"\|\s*`([A-Z_]+)`", match.group(1))}
+
+        # Parser for the "Triggers" table based on its unique column header.
+        def _parse_triggers_table() -> Set[str]:
+            match = re.search(r"\| 条件 \(`EVENT_TYPE`\).*?\n\|[-|: ]+\n(.*?)(?:---|\Z)", content, re.S)
+            if not match:
+                print("Warning: Could not find Triggers table", file=sys.stderr)
+                return set()
+            return {item.strip() for item in re.findall(r"\|\s*`([A-Z_]+)`", match.group(1))}
+
+        definitions["required_keys"] = _parse_md_list("必选顶层键")
+        optional_keys = _parse_md_list("可选顶层键")
+        definitions["allowed_keys"] = definitions["required_keys"].union(optional_keys)
+        definitions["card_types"] = _parse_md_list("合法卡牌类型")
+
+        definitions["actions"] = _parse_actions_table()
+        definitions["triggers"] = _parse_triggers_table()
+
+        print(f"  - Loaded {len(definitions['required_keys'])} required keys: {sorted(list(definitions['required_keys']))}")
+        print(f"  - Loaded {len(definitions['allowed_keys'])} total allowed keys.")
+        print(f"  - Loaded {len(definitions['card_types'])} card types: {sorted(list(definitions['card_types']))}")
+        print(f"  - Loaded {len(definitions['actions'])} actions.")
+        print(f"  - Loaded {len(definitions['triggers'])} trigger conditions: {sorted(list(definitions['triggers']))}")
+        print("--- Schema loading complete ---\n")
+
     except FileNotFoundError:
         print(f"  [Error] Schema file not found at: {schema_path}", file=sys.stderr)
-        return set()
+        sys.exit(1)
     except Exception as e:
         print(f"  [Error] Failed to parse schema file: {e}", file=sys.stderr)
-        return set()
+        sys.exit(1)
 
-# --- Schema Definition (based on card_logic_schema.md v3.1) ---
+    return definitions
 
-# Allowed top-level keys in a card JSON
-VALID_TOP_LEVEL_KEYS: Set[str] = {
-    "id", "name", "symbol", "sequence", "pinyin", "strokes", "type",
-    "core_mechanism", "effect", "triggers", "usage_limit", "metadata"
-}
+# --- Schema Definition (loaded dynamically) ---
+schema_defs = load_definitions_from_schema(DEFAULT_SCHEMA_PATH)
 
-# Required top-level keys for every card
-REQUIRED_TOP_LEVEL_KEYS: Set[str] = {"id", "name", "type"}
+VALID_TOP_LEVEL_KEYS = schema_defs["allowed_keys"]
+REQUIRED_TOP_LEVEL_KEYS = schema_defs["required_keys"]
+VALID_CARD_TYPES = schema_defs["card_types"]
+VALID_ACTIONS = schema_defs["actions"]
+VALID_TRIGGER_CONDITIONS = schema_defs["triggers"]
 
-# Allowed card types
-VALID_CARD_TYPES: Set[str] = {
-    "basic", "function", "natal", "destiny", "stem", "branch", "celestial"
-}
-
-# Allowed action types are now loaded dynamically
-VALID_ACTIONS = load_actions_from_schema(DEFAULT_SCHEMA_PATH)
-if not VALID_ACTIONS:
-    print("Could not load actions from schema. Aborting.", file=sys.stderr)
+if not all([VALID_TOP_LEVEL_KEYS, REQUIRED_TOP_LEVEL_KEYS, VALID_CARD_TYPES, VALID_ACTIONS, VALID_TRIGGER_CONDITIONS]):
+    print("Critical schema definitions could not be loaded. Aborting.", file=sys.stderr)
     sys.exit(1)
 
-# Allowed parameters for each action, derived from card_logic_schema.md
+# This remains hardcoded as the schema format is not easily machine-readable for this part.
 REQUIRED_ACTION_PARAMS: Dict[str, Set[str]] = {
     # Resource Actions
     "GAIN_RESOURCE": {"target", "resource", "value"},
@@ -98,11 +129,6 @@ REQUIRED_ACTION_PARAMS: Dict[str, Set[str]] = {
     "TRIGGER_EVENT": {"event_id", "participants"},
 }
 
-# Allowed trigger conditions
-VALID_TRIGGER_CONDITIONS: Set[str] = {
-    "ON_BEING_TARGETED", "ON_PLAYER_ACTION", "ON_PHASE_START", "ON_RESOURCE_CHANGE"
-}
-
 # --- Linter Logic ---
 
 def lint_card(card_data: Dict[str, Any], card_id: str) -> List[str]:
@@ -132,14 +158,24 @@ def lint_card(card_data: Dict[str, Any], card_id: str) -> List[str]:
         errors.append(f"Card ID in file '{card_id}' does not match 'id' field in JSON: '{card_data.get('id')}'")
 
     # 5. Recursively validate effects and actions
-    # This is a simplified check. A full implementation would be more deeply nested.
-    if 'core_mechanism' in card_data and 'variants' in card_data['core_mechanism']:
+    if 'core_mechanism' in card_data and isinstance(card_data.get('core_mechanism'), dict) and 'variants' in card_data['core_mechanism']:
         for variant, content in card_data['core_mechanism']['variants'].items():
-            if 'effect' in content:
+            if isinstance(content, dict) and 'effect' in content:
                 errors.extend(_validate_effect_object(content['effect'], f"core_mechanism.variants.{variant}"))
 
     if 'effect' in card_data:
         errors.extend(_validate_effect_object(card_data['effect'], "effect"))
+
+    # 6. Validate triggers
+    if 'triggers' in card_data:
+        if not isinstance(card_data['triggers'], list):
+            errors.append("'triggers' must be a list of trigger objects.")
+        else:
+            for i, trigger in enumerate(card_data['triggers']):
+                if not isinstance(trigger, dict) or 'condition' not in trigger:
+                    errors.append(f"Trigger {i} is missing a 'condition' key.")
+                elif trigger['condition'] not in VALID_TRIGGER_CONDITIONS:
+                    errors.append(f"Trigger {i} has an invalid condition: '{trigger['condition']}'.")
 
     return errors
 
@@ -288,7 +324,8 @@ def main():
                     print(f"  - {error}")
                 total_errors += len(errors)
             else:
-                print(f"\n--- {filepath}: OK")
+                # Keep output clean for successful runs
+                pass
 
         except json.JSONDecodeError as e:
             print(f"\n--- Error decoding JSON in {filepath}:")

@@ -59,6 +59,7 @@
                 "status_id": "MONTORIAL_FOG",
                 "duration": 1,
                 "value": {
+                  "teach_effect": {},
                   "discipline_effect": {
                     "action": "LOSE_RESOURCE",
                     "params": {
@@ -84,6 +85,7 @@
                 "status_id": "MONTORIAL_FOG",
                 "duration": 1,
                 "value": {
+                  "teach_effect": {},
                   "discipline_effect": {
                     "action": "COPY_EFFECT",
                     "params": {
