@@ -55,7 +55,7 @@
               "action": "MODIFY_RULE",
               "params": {
                 "rule_id": "TURN_ORDER_REVERSED",
-                "scope": "GLOBAL",
+                "scope": "persistent",
                 "mutation": {
                   "type": "SET_BOOLEAN",
                   "value": true

@@ -48,7 +48,7 @@
               "action": "MODIFY_RULE",
               "params": {
                 "rule_id": "HAND_LIMIT_DRAW",
-                "scope": "GLOBAL",
+                "scope": "turn",
                 "mutation": {
                   "type": "ADD_MODIFIER",
                   "value": -1

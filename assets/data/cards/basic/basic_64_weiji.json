@@ -17,7 +17,7 @@
               "action": "MODIFY_RULE",
               "params": {
                 "rule_id": "YIN_YANG_SYSTEM_REVERSED",
-                "scope": "SELF",
+                "scope": "turn",
                 "mutation": {
                   "type": "SET_BOOLEAN",
                   "value": true

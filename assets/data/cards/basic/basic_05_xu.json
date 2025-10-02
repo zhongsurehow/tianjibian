@@ -34,6 +34,7 @@
               "params": {
                 "delay": "NEXT_UPKEEP_PHASE",
                 "expiry_time": "1 ROUND",
+                "snapshot_args": true,
                 "effect": {
                   "actions": [
                     {
@@ -74,6 +75,7 @@
               "params": {
                 "delay": "NEXT_UPKEEP_PHASE",
                 "expiry_time": "1 ROUND",
+                "snapshot_args": true,
                 "condition": {
                   "op": "PLAYER_HAS_NOT_TAKEN_DAMAGE_SINCE",
                   "params": {
@@ -120,6 +122,7 @@
               "params": {
                 "delay": "NEXT_UPKEEP_PHASE",
                 "expiry_time": "1 ROUND",
+                "snapshot_args": true,
                 "effect": {
                   "actions": [
                     {

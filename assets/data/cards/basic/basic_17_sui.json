@@ -19,7 +19,8 @@
               "params": {
                 "target": "SELF",
                 "destination": "ADJACENT_TO_PLAYER",
-                "player": "LAST_ACTED_PLAYER"
+                "player": "LAST_ACTED_PLAYER",
+                "value": 1
               }
             }
           ]

@@ -56,7 +56,8 @@
               "params": {
                 "target": "ALLY_FORMAL_ALL",
                 "destination": "PLAYER_ZONE",
-                "player": "SELF"
+                "player": "SELF",
+                "value": 1
               }
             }
           ]

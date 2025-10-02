@@ -231,45 +231,52 @@ To avoid "magic strings," actions that need to reference dynamic game state (lik
 
 ## 6. 示例：将《蹇》卦数据化 (新版)
 
-**卡牌意图:** 在被攻击时，可以从手中打出此牌，无效化攻击，并后退一格。
+**卡牌意图:** 行动艰难，充满阻碍。根据玩家所在的位置（部），产生不同的阻碍效果。
 
 **实现方式:**
-1.  《蹇》牌本身没有 `effect`，只有 `triggers`。
-2.  引擎规则：玩家可以在满足特定触发条件时，从手中打出带有该触发器的牌。
+1.  《蹇》牌拥有一个 `core_mechanism`，其中包含 `variants`，分别对应天、人、地三部的不同效果。
+2.  引擎在解读阶段，会根据玩家棋子所在的“部”，执行对应的 `effect`。
 
 ```json
 // jian.json
 {
   "id": "basic_39_jian",
-  // ...
-  "triggers": [
-    {
-      "condition": "ON_BEING_TARGETED",
-      "params": { "source_type": "ATTACK" },
-      "playable_from_hand": true, // **新增元数据，表示此牌可作为响应牌打出**
-      "effect": {
-        "description": "发动【知难而退】",
-        "actions": [
-          {
-            "action": "INTERRUPT",
-            "params": {
-              // The engine infers the target action from the trigger's context.
-              // For "ON_BEING_TARGETED" by an "ATTACK", it interrupts that attack.
-              "interrupt_type": "CANCEL"
-            }
-          },
-          {
-            "action": "MOVE",
-            "params": {
-              "target": "SELF",
-              "move_type": "RETREAT", // 后退一格
-              "value": 1
-            }
-          }
-        ]
+  "name": "蹇",
+  "symbol": "☵☶",
+  "sequence": 39,
+  "pinyin": "jian",
+  "strokes": 39,
+  "type": "basic",
+  "core_mechanism": {
+    "name": "进退维谷",
+    "description": "行动艰难，充满阻碍。",
+    "variants": {
+      "di": {
+        "name": "往蹇来誉",
+        "effect": {
+          "actions": [
+            { "action": "CREATE_ENTITY", "params": { "entity_type": "HINDRANCE", "position": "SELF", "duration": 1, "properties": { "blocks_movement": { "for": "ALL_PLAYERS" } } } }
+          ]
+        }
+      },
+      "ren": {
+        "name": "王臣蹇蹇",
+        "effect": {
+          "actions": [
+            { "action": "APPLY_STATUS", "params": { "target": "OPPONENT_CHOICE_SINGLE", "status_id": "ACTION_COST_INCREASED", "value": 2, "duration": "NEXT_ACTION" } }
+          ]
+        }
+      },
+      "tian": {
+        "name": "利见大人",
+        "effect": {
+          "actions": [
+            { "action": "APPLY_STATUS", "params": { "target": "OPPONENT_CHOICE_SINGLE", "status_id": "CANNOT_MOVE", "duration": 1 } }
+          ]
+        }
       }
     }
-  ]
+  }
 }
 ```
 

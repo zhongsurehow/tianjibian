@@ -42,7 +42,8 @@
               "action": "MOVE",
               "params": {
                 "target": "SELF",
-                "destination": "EMPTY_IN_SAME_DEPARTMENT"
+                "destination": "EMPTY_IN_SAME_DEPARTMENT",
+                "value": 1
               }
             }
           ]

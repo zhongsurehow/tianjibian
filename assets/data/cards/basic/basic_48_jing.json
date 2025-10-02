@@ -20,6 +20,7 @@
                 "entity_type": "WELLSPRING",
                 "position": "SELF",
                 "is_permanent": true,
+                "max_instances": 1,
                 "properties": {
                   "name": "甘泉井",
                   "on_turn_end_effect": {

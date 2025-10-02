@@ -18,7 +18,8 @@
               "action": "MOVE",
               "params": {
                 "target": "SELF",
-                "destination": "START_OF_TURN_POSITION"
+                "destination": "START_OF_TURN_POSITION",
+                "value": 1
               }
             }
           ]

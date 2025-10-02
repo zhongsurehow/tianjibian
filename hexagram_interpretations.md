@@ -1,4 +1,4 @@
-**版本: 3.0 (Data-Driven Update)**
+**版本: 3.1 (Data-Driven Update)**
 **说明:** 本文档是游戏卡牌逻辑的 **单一事实来源 (Single Source of Truth)**。每张卡牌的描述下方都包含一个 `json` 代码块，该代码块定义了卡牌在游戏引擎中的确切行为。
 
 **开发者指南:**
@@ -195,7 +195,8 @@
               "params": {
                 "target": "SELF",
                 "source_effect": { "type": "LAST_BASIC_CARD_EFFECT_PLAYED", "player_scope": "LAST_ACTED_PLAYER" },
-                "modifications": { "remove_negative_parts": true }
+                "modifications": { "remove_negative_parts": true },
+                "copy_semantics": "snapshot"
               }
             }
           ]
@@ -249,6 +250,7 @@
           "entity_type": "ENTITY_TUN",
           "position": "SELF",
           "owner": "SELF",
+          "max_instances": 1,
           "properties": {
             "name": "屯",
             "duration": 3,
@@ -269,7 +271,7 @@
           "actions": [
             { "action": "DESTROY_ENTITY", "params": { "target_entity_type": "ENTITY_TUN", "position": "SELF" } },
             { "action": "MOVE", "params": { "target": "SELF", "destination": "ADJACENT_EMPTY", "value": 1 } },
-            { "action": "CREATE_ENTITY", "params": { "entity_type": "ENTITY_OUTPOST", "position": "SELF", "owner": "SELF", "is_permanent": true, "properties": { "name": "前哨", "on_enter_effect": { "actions": [{"action": "GAIN_RESOURCE", "params": {"target": "EVENT_SOURCE_PLAYER", "resource": "gold", "value": 2}}]}, "on_leave_effect": {"actions": [{"action": "GAIN_RESOURCE", "params": {"target": "EVENT_SOURCE_PLAYER", "resource": "gold", "value": 2}}]} } } }
+            { "action": "CREATE_ENTITY", "params": { "entity_type": "ENTITY_OUTPOST", "position": "SELF", "owner": "SELF", "is_permanent": true, "max_instances": 1, "properties": { "name": "前哨", "on_enter_effect": { "actions": [{"action": "GAIN_RESOURCE", "params": {"target": "EVENT_SOURCE_PLAYER", "resource": "gold", "value": 2}}]}, "on_leave_effect": {"actions": [{"action": "GAIN_RESOURCE", "params": {"target": "EVENT_SOURCE_PLAYER", "resource": "gold", "value": 2}}]} } } }
           ]
         }
       },
@@ -410,7 +412,7 @@
           "actions": [
             { "action": "SKIP_PHASE", "params": { "phase": "INTERPRETATION" } },
             { "action": "APPLY_STATUS", "params": { "target": "SELF", "status_id": "IMMUNITY_GENERAL_NEGATIVE", "value": 1, "duration": 1 } },
-            { "action": "EXECUTE_LATER", "params": { "delay": "NEXT_UPKEEP_PHASE", "expiry_time": "1 ROUND", "effect": { "actions": [ { "action": "GAIN_RESOURCE", "params": { "target": "SELF", "resource": "gold", "value": 10 } }, { "action": "DRAW_CARD", "params": { "target": "SELF", "deck": "basic", "count": 2 } } ] } } }
+            { "action": "EXECUTE_LATER", "params": { "delay": "NEXT_UPKEEP_PHASE", "expiry_time": "1 ROUND", "snapshot_args": true, "effect": { "actions": [ { "action": "GAIN_RESOURCE", "params": { "target": "SELF", "resource": "gold", "value": 10 } }, { "action": "DRAW_CARD", "params": { "target": "SELF", "deck": "basic", "count": 2 } } ] } } }
           ]
         }
       },
@@ -419,7 +421,7 @@
         "effect": {
           "actions": [
             { "action": "SKIP_PHASE", "params": { "phase": "INTERPRETATION" } },
-            { "action": "EXECUTE_LATER", "params": { "delay": "NEXT_UPKEEP_PHASE", "expiry_time": "1 ROUND", "condition": { "op": "PLAYER_HAS_NOT_TAKEN_DAMAGE_SINCE", "params": { "timestamp": "NOW" } }, "effect": { "actions": [ { "action": "GAIN_RESOURCE", "params": { "target": "SELF", "resource": "gold", "value": 15 } }, { "action": "DRAW_CARD", "params": { "target": "SELF", "deck": "basic", "count": 3 } } ] } } }
+            { "action": "EXECUTE_LATER", "params": { "delay": "NEXT_UPKEEP_PHASE", "expiry_time": "1 ROUND", "snapshot_args": true, "condition": { "op": "PLAYER_HAS_NOT_TAKEN_DAMAGE_SINCE", "params": { "timestamp": "NOW" } }, "effect": { "actions": [ { "action": "GAIN_RESOURCE", "params": { "target": "SELF", "resource": "gold", "value": 15 } }, { "action": "DRAW_CARD", "params": { "target": "SELF", "deck": "basic", "count": 3 } } ] } } }
           ]
         }
       },
@@ -428,7 +430,7 @@
         "effect": {
           "actions": [
             { "action": "SKIP_PHASE", "params": { "phase": "INTERPRETATION" } },
-            { "action": "EXECUTE_LATER", "params": { "delay": "NEXT_UPKEEP_PHASE", "expiry_time": "1 ROUND", "effect": { "actions": [ { "action": "GAIN_RESOURCE", "params": { "target": "SELF", "resource": "gold", "value": 10 } }, { "action": "CHOICE", "params": { "target": "SELF", "options": [ { "description": "将10金币赠予盟友", "effect": { "action": "TRANSFER_RESOURCE", "params": { "from": "SELF", "to": "ALLY_FORMAL_SINGLE", "resource": "gold", "value": 10 } } } ] } } ] } } }
+            { "action": "EXECUTE_LATER", "params": { "delay": "NEXT_UPKEEP_PHASE", "expiry_time": "1 ROUND", "snapshot_args": true, "effect": { "actions": [ { "action": "GAIN_RESOURCE", "params": { "target": "SELF", "resource": "gold", "value": 10 } }, { "action": "CHOICE", "params": { "target": "SELF", "options": [ { "description": "将10金币赠予盟友", "effect": { "action": "TRANSFER_RESOURCE", "params": { "from": "SELF", "to": "ALLY_FORMAL_SINGLE", "resource": "gold", "value": 10 } } } ] } } ] } } }
           ]
         }
       }
@@ -1151,7 +1153,7 @@
         "name": "出门交",
         "effect": {
           "actions": [
-            { "action": "MOVE", "params": { "target": "SELF", "destination": "ADJACENT_TO_PLAYER", "player": "LAST_ACTED_PLAYER" } }
+            { "action": "MOVE", "params": { "target": "SELF", "destination": "ADJACENT_TO_PLAYER", "player": "LAST_ACTED_PLAYER", "value": 1 } }
           ]
         }
       },
@@ -1504,7 +1506,7 @@
         "name": "不远复",
         "effect": {
           "actions": [
-            { "action": "MOVE", "params": { "target": "SELF", "destination": "START_OF_TURN_POSITION" } }
+            { "action": "MOVE", "params": { "target": "SELF", "destination": "START_OF_TURN_POSITION", "value": 1 } }
           ]
         }
       },
@@ -1605,7 +1607,7 @@
         "effect": {
           "actions": [
             { "action": "SKIP_PHASE", "params": { "phase": "MOVEMENT" } },
-            { "action": "EXECUTE_LATER", "params": { "delay": "NEXT_TURN_START", "expiry_time": "1 ROUND", "effect": { "actions": [ { "action": "GAIN_RESOURCE", "params": { "target": "SELF", "resource": "gold", "value": 5 } } ] } } }
+            { "action": "EXECUTE_LATER", "params": { "delay": "NEXT_TURN_START", "expiry_time": "1 ROUND", "snapshot_args": true, "effect": { "actions": [ { "action": "GAIN_RESOURCE", "params": { "target": "SELF", "resource": "gold", "value": 5 } } ] } } }
           ]
         }
       },
@@ -1917,7 +1919,7 @@
         "name": "浚恒",
         "effect": {
           "actions": [
-            { "action": "EXECUTE_LATER", "params": { "delay": "NEXT_TURN_START", "repeat": 3, "expiry_time": "3 ROUNDS", "effect": { "actions": [ { "action": "GAIN_RESOURCE", "params": { "target": "SELF", "resource": "gold", "value": 1 } } ] } } }
+            { "action": "EXECUTE_LATER", "params": { "delay": "NEXT_TURN_START", "repeat": 3, "expiry_time": "3 ROUNDS", "snapshot_args": true, "effect": { "actions": [ { "action": "GAIN_RESOURCE", "params": { "target": "SELF", "resource": "gold", "value": 1 } } ] } } }
           ]
         }
       },
@@ -1977,7 +1979,7 @@
         "effect": {
           "cost": [{ "action": "DISCARD_CARD", "params": { "target": "SELF", "count": 1 } }],
           "actions": [
-            { "action": "MOVE", "params": { "target": "SELF", "destination": "EMPTY_IN_SAME_DEPARTMENT" } }
+            { "action": "MOVE", "params": { "target": "SELF", "destination": "EMPTY_IN_SAME_DEPARTMENT", "value": 1 } }
           ]
         }
       },
@@ -2276,7 +2278,7 @@
         "name": "往蹇来誉",
         "effect": {
           "actions": [
-            { "action": "CREATE_ENTITY", "params": { "entity_type": "HINDRANCE", "position": "SELF", "duration": 1, "properties": { "blocks_movement": { "for": "ALL_PLAYERS" } } } }
+            { "action": "CREATE_ENTITY", "params": { "entity_type": "HINDRANCE", "position": "SELF", "duration": 1, "max_instances": 1, "properties": { "blocks_movement": { "for": "ALL_PLAYERS" } } } }
           ]
         }
       },
@@ -2528,7 +2530,7 @@
         "name": "系于金柅",
         "effect": {
           "actions": [
-            { "action": "MOVE", "params": { "target": "SELF", "destination": "PLAYER_ZONE", "player": "OPPONENT_RANDOM" } }
+            { "action": "MOVE", "params": { "target": "SELF", "destination": "PLAYER_ZONE", "player": "OPPONENT_RANDOM", "value": 1 } }
           ]
         }
       },
@@ -2597,7 +2599,7 @@
         "effect": {
           "condition": { "op": "PLAYER_HAS_ALLY" },
           "actions": [
-            { "action": "MOVE", "params": { "target": "ALLY_FORMAL_ALL", "destination": "PLAYER_ZONE", "player": "SELF" } }
+            { "action": "MOVE", "params": { "target": "ALLY_FORMAL_ALL", "destination": "PLAYER_ZONE", "player": "SELF", "value": 1 } }
           ]
         }
       }
@@ -2632,7 +2634,7 @@
         "effect": {
           "condition": { "op": "IS_IN_DEPARTMENT", "params": { "target": "SELF", "department": "di" } },
           "actions": [
-            { "action": "MOVE", "params": { "target": "SELF", "destination": "RANDOM_EMPTY_IN_DEPARTMENT", "department": "ren" } }
+            { "action": "MOVE", "params": { "target": "SELF", "destination": "RANDOM_EMPTY_IN_DEPARTMENT", "department": "ren", "value": 1 } }
           ]
         }
       },
@@ -2641,7 +2643,7 @@
         "effect": {
           "condition": { "op": "IS_IN_DEPARTMENT", "params": { "target": "SELF", "department": "ren" } },
           "actions": [
-            { "action": "MOVE", "params": { "target": "SELF", "destination": "RANDOM_EMPTY_IN_DEPARTMENT", "department": "tian" } }
+            { "action": "MOVE", "params": { "target": "SELF", "destination": "RANDOM_EMPTY_IN_DEPARTMENT", "department": "tian", "value": 1 } }
           ]
         }
       },
@@ -2733,7 +2735,7 @@
         "name": "井渫不食",
         "effect": {
           "actions": [
-            { "action": "CREATE_ENTITY", "params": { "entity_type": "WELLSPRING", "position": "SELF", "is_permanent": true, "properties": { "name": "甘泉井", "on_turn_end_effect": { "actions": [ { "action": "GAIN_RESOURCE", "params": { "target": "EVENT_SOURCE_PLAYER", "resource": "gold", "value": 2 } } ] } } } }
+            { "action": "CREATE_ENTITY", "params": { "entity_type": "WELLSPRING", "position": "SELF", "is_permanent": true, "max_instances": 1, "properties": { "name": "甘泉井", "on_turn_end_effect": { "actions": [ { "action": "GAIN_RESOURCE", "params": { "target": "EVENT_SOURCE_PLAYER", "resource": "gold", "value": 2 } } ] } } } }
           ]
         }
       },
@@ -2800,7 +2802,7 @@
         "name": "君子豹变",
         "effect": {
           "actions": [
-            { "action": "MODIFY_RULE", "params": { "rule_id": "TURN_ORDER_REVERSED", "scope": "GLOBAL", "mutation": { "type": "SET_BOOLEAN", "value": true }, "duration": "PERMANENT" } }
+            { "action": "MODIFY_RULE", "params": { "rule_id": "TURN_ORDER_REVERSED", "scope": "persistent", "mutation": { "type": "SET_BOOLEAN", "value": true }, "duration": "PERMANENT" } }
           ]
         }
       }
@@ -2941,7 +2943,7 @@
         "effect": {
           "actions": [
             { "action": "APPLY_STATUS", "params": { "target": "SELF", "status_id": "CANNOT_MOVE", "duration": 1 } },
-            { "action": "EXECUTE_LATER", "params": { "delay": "NEXT_TURN_START", "expiry_time": "1 ROUND", "effect": { "actions": [ { "action": "GAIN_RESOURCE", "params": { "target": "SELF", "resource": "gold", "value": 5 } } ] } } }
+            { "action": "EXECUTE_LATER", "params": { "delay": "NEXT_TURN_START", "expiry_time": "1 ROUND", "snapshot_args": true, "effect": { "actions": [ { "action": "GAIN_RESOURCE", "params": { "target": "SELF", "resource": "gold", "value": 5 } } ] } } }
           ]
         }
       },
@@ -2957,7 +2959,7 @@
         "name": "时行则行",
         "effect": {
           "actions": [
-            { "action": "MODIFY_RULE", "params": { "rule_id": "CARD_EFFECT_MOVEMENT_BLOCKED", "scope": "GLOBAL", "mutation": { "type": "SET_BOOLEAN", "value": true }, "duration": 1 } }
+            { "action": "MODIFY_RULE", "params": { "rule_id": "CARD_EFFECT_MOVEMENT_BLOCKED", "scope": "turn", "mutation": { "type": "SET_BOOLEAN", "value": true }, "duration": 1 } }
           ]
         }
       }
@@ -3101,7 +3103,7 @@
         "name": "丰其屋",
         "effect": {
           "actions": [
-            { "action": "CREATE_ENTITY", "params": { "entity_type": "TREASURE_CAULDRON", "position": "SELF", "is_permanent": true, "properties": { "name": "宝鼎", "on_turn_start_effect": { "actions": [ { "action": "GAIN_RESOURCE", "params": { "target": "OWNER", "resource": "gold", "value": 1 } } ] } } } }
+            { "action": "CREATE_ENTITY", "params": { "entity_type": "TREASURE_CAULDRON", "position": "SELF", "is_permanent": true, "max_instances": 1, "properties": { "name": "宝鼎", "on_turn_start_effect": { "actions": [ { "action": "GAIN_RESOURCE", "params": { "target": "OWNER", "resource": "gold", "value": 1 } } ] } } } }
           ]
         }
       },
@@ -3366,7 +3368,7 @@
         "name": "甘节",
         "effect": {
           "actions": [
-            { "action": "MODIFY_RULE", "params": { "rule_id": "HAND_LIMIT_DRAW", "scope": "GLOBAL", "mutation": { "type": "ADD_MODIFIER", "value": -1 }, "duration": 1 } }
+            { "action": "MODIFY_RULE", "params": { "rule_id": "HAND_LIMIT_DRAW", "scope": "turn", "mutation": { "type": "ADD_MODIFIER", "value": -1 }, "duration": 1 } }
           ]
         }
       }
@@ -3553,7 +3555,7 @@
       "di": {
         "name": "倒置",
         "effect": {
-          "actions": [{ "action": "MODIFY_RULE", "params": { "rule_id": "YIN_YANG_SYSTEM_REVERSED", "scope": "SELF", "mutation": { "type": "SET_BOOLEAN", "value": true }, "duration": 1 } }]
+          "actions": [{ "action": "MODIFY_RULE", "params": { "rule_id": "YIN_YANG_SYSTEM_REVERSED", "scope": "turn", "mutation": { "type": "SET_BOOLEAN", "value": true }, "duration": 1 } }]
         }
       },
       "ren": {

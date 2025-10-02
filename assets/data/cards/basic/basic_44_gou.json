@@ -19,7 +19,8 @@
               "params": {
                 "target": "SELF",
                 "destination": "PLAYER_ZONE",
-                "player": "OPPONENT_RANDOM"
+                "player": "OPPONENT_RANDOM",
+                "value": 1
               }
             }
           ]

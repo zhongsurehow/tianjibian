@@ -1,7 +1,42 @@
 import json
 import os
+import re
 import sys
+from pathlib import Path
 from typing import Any, Dict, List, Set
+
+# --- Dynamic Schema Loading ---
+
+SCRIPT_DIR = Path(__file__).parent.resolve()
+ROOT_DIR = SCRIPT_DIR.parent
+DEFAULT_SCHEMA_PATH = ROOT_DIR / "card_logic_schema.md"
+
+def load_actions_from_schema(schema_path: Path) -> Set[str]:
+    """Parses the schema file to extract all valid action names."""
+    print(f"Loading actions from schema: {schema_path.name}")
+    try:
+        content = schema_path.read_text(encoding="utf-8")
+        action_table_match = re.search(
+            r"## 4\. 动作 \(Action\).*?\| 类型.*?\|(.*?)^---", content, re.S | re.M
+        )
+        if not action_table_match:
+            print("  [Error] Could not find the Action table in the schema file.", file=sys.stderr)
+            return set()
+
+        table_content = action_table_match.group(1)
+        # V3.1: Use the more robust regex to find actions in the markdown table.
+        actions = {
+            action.strip()
+            for action in re.findall(r"\|\s*`([A-Z_]+)`\s*\|", table_content)
+        }
+        print(f"  Successfully loaded {len(actions)} valid actions from schema.")
+        return actions
+    except FileNotFoundError:
+        print(f"  [Error] Schema file not found at: {schema_path}", file=sys.stderr)
+        return set()
+    except Exception as e:
+        print(f"  [Error] Failed to parse schema file: {e}", file=sys.stderr)
+        return set()
 
 # --- Schema Definition (based on card_logic_schema.md v3.1) ---
 
@@ -19,15 +54,11 @@ VALID_CARD_TYPES: Set[str] = {
     "basic", "function", "natal", "destiny", "stem", "branch", "celestial"
 }
 
-# Allowed action types
-VALID_ACTIONS: Set[str] = {
-    "GAIN_RESOURCE", "LOSE_RESOURCE", "PAY_COST", "DEAL_DAMAGE", "MOVE",
-    "SWAP_POSITION", "APPLY_STATUS", "REMOVE_STATUS", "MODIFY_RULE", "CHOICE",
-    "LOOKUP", "INTERRUPT", "COPY_EFFECT", "CREATE_ENTITY", "DESTROY_ENTITY",
-    "EXECUTE_LATER", "TRIGGER_EVENT", "DISCARD_CARD",
-    # 新增支持的动作类型（与 card_logic_schema.md v3.1 保持一致）
-    "DRAW_CARD", "PROPOSE_ALLIANCE", "SKIP_PHASE", "SWAP_HAND_CARDS", "SWAP_RESOURCE", "SWAP_DISCARD_PILES", "MODIFY_RESOURCE", "TRANSFER_RESOURCE"
-}
+# Allowed action types are now loaded dynamically
+VALID_ACTIONS = load_actions_from_schema(DEFAULT_SCHEMA_PATH)
+if not VALID_ACTIONS:
+    print("Could not load actions from schema. Aborting.", file=sys.stderr)
+    sys.exit(1)
 
 # Allowed parameters for each action (simplified for this linter)
 # A more robust linter would have detailed checks for each
@@ -106,8 +137,15 @@ def _validate_effect_object(effect: Dict[str, Any], path: str) -> List[str]:
             errors.append(f"'{path}.cost' must be a list.")
         else:
             for i, cost_item in enumerate(effect['cost']):
-                 if not all(k in cost_item for k in ['resource', 'value']):
-                     errors.append(f"Invalid cost item at '{path}.cost[{i}]'. Must contain 'resource' and 'value'.")
+                is_resource_cost = isinstance(cost_item, dict) and all(k in cost_item for k in ['resource', 'value'])
+                is_action_cost = isinstance(cost_item, dict) and 'action' in cost_item
+
+                if not (is_resource_cost or is_action_cost):
+                    errors.append(f"Invalid cost item at '{path}.cost[{i}]'. Must be a resource object or an action object.")
+
+                # If the cost is an action, recursively validate it.
+                if is_action_cost:
+                    errors.extend(_validate_action_object(cost_item, f"{path}.cost[{i}]"))
 
     return errors
 

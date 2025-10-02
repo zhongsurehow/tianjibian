@@ -20,6 +20,7 @@
                 "delay": "NEXT_TURN_START",
                 "repeat": 3,
                 "expiry_time": "3 ROUNDS",
+                "snapshot_args": true,
                 "effect": {
                   "actions": [
                     {

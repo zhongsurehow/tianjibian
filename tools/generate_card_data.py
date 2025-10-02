@@ -71,9 +71,13 @@ class CardSchema:
                 return
 
             table_content = action_table_match.group(1)
+            # V3.1: Regex updated to be more robust. It now correctly finds actions
+            # even if they have extra spaces, newlines, or other formatting issues
+            # inside the table row. It looks for the start of a table row `|`,
+            # and captures the code-formatted action name from the first column.
             self.actions = {
                 action.strip()
-                for action in re.findall(r"\|\s*`([A-Z_]+)`", table_content)
+                for action in re.findall(r"\|\s*`([A-Z_]+)`\s*\|", table_content)
             }
             print(f"  Successfully loaded {len(self.actions)} valid actions from schema.")
 

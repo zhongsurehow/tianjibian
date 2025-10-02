@@ -20,6 +20,7 @@
                 "entity_type": "HINDRANCE",
                 "position": "SELF",
                 "duration": 1,
+                "max_instances": 1,
                 "properties": {
                   "blocks_movement": {
                     "for": "ALL_PLAYERS"

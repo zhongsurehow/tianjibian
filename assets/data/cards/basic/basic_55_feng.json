@@ -35,6 +35,7 @@
                 "entity_type": "TREASURE_CAULDRON",
                 "position": "SELF",
                 "is_permanent": true,
+                "max_instances": 1,
                 "properties": {
                   "name": "宝鼎",
                   "on_turn_start_effect": {
