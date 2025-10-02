@@ -283,8 +283,24 @@ def main():
         print("\nErrors were found. Halting file generation.", file=sys.stderr)
         sys.exit(1)
 
-    if valid_cards:
-        generate_card_files(valid_cards, OUTPUT_DIR)
+    cards_to_generate = []
+    for card in valid_cards:
+        quantity = card.get("quantity")
+        if isinstance(quantity, int) and quantity > 1:
+            base_id = card.get("id", "unknown_card")
+            card_template = card.copy()
+            if "quantity" in card_template:
+                del card_template["quantity"]
+
+            for i in range(1, quantity + 1):
+                instance_card = card_template.copy()
+                instance_card["id"] = f"{base_id}_{i}"
+                cards_to_generate.append(instance_card)
+        else:
+            cards_to_generate.append(card)
+
+    if cards_to_generate:
+        generate_card_files(cards_to_generate, OUTPUT_DIR)
     else:
         print("\nNo valid cards to generate.")
 
