@@ -983,7 +983,7 @@
 - **爻辞变量：**
   - **地部 (交相利):** 你获得8金币。
   - **人部 (公用亨于天子):** 你获得5金币并抽2张基础牌。
-  - **天部 (自天祐之):** 你获得12金币，但必须展示给所有玩家看。
+  - **天部 (自天祐之):** 你获得10金币。
 ```json
 {
   "id": "basic_14_da_you",
@@ -1018,7 +1018,7 @@
         "name": "自天祐之",
         "effect": {
           "actions": [
-            { "action": "GAIN_RESOURCE", "params": { "target": "SELF", "resource": "gold", "value": 12 } }
+            { "action": "GAIN_RESOURCE", "params": { "target": "SELF", "resource": "gold", "value": 10 } }
           ]
         }
       }
