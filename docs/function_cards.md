@@ -9,11 +9,11 @@
     "type": "function",
     "name": "错卦",
     "quantity": 4,
-    "core_mechanism": {
-        "description": "将基础牌的每一个爻都进行阴阳反转，变为一个全新的卦来解读。"
-    },
     "metadata": {
         "image_url": "assets/images/cards/function/function_cuo.png"
+    },
+    "core_mechanism": {
+        "description": "将基础牌的每一个爻都进行阴阳反转，变为一个全新的卦来解读。"
     }
 }
 ```
@@ -26,11 +26,11 @@
     "type": "function",
     "name": "覆卦",
     "quantity": 4,
-    "core_mechanism": {
-        "description": "解读基础牌时，执行爻辞的顺序颠倒，变为【天部】→【人部】→【地部】。"
-    },
     "metadata": {
         "image_url": "assets/images/cards/function/function_fu.png"
+    },
+    "core_mechanism": {
+        "description": "解读基础牌时，执行爻辞的顺序颠倒，变为【天部】→【人部】→【地部】。"
     }
 }
 ```
@@ -43,11 +43,11 @@
     "type": "function",
     "name": "互卦",
     "quantity": 4,
-    "core_mechanism": {
-        "description": "解读基础牌后，额外从牌库顶翻开一张牌，只执行其【人部】的效果。"
-    },
     "metadata": {
         "image_url": "assets/images/cards/function/function_hu.png"
+    },
+    "core_mechanism": {
+        "description": "解读基础牌后，额外从牌库顶翻开一张牌，只执行其【人部】的效果。"
     }
 }
 ```
@@ -60,11 +60,11 @@
     "type": "function",
     "name": "虚招",
     "quantity": 4,
-    "core_mechanism": {
-        "description": "本轮免疫惩罚，但亦无奖励。之后从基础牌库补充2张牌。"
-    },
     "metadata": {
         "image_url": "assets/images/cards/function/function_xu.png"
+    },
+    "core_mechanism": {
+        "description": "本轮免疫惩罚，但亦无奖励。之后从基础牌库补充2张牌。"
     }
 }
 ```
@@ -77,11 +77,11 @@
     "type": "function",
     "name": "综卦",
     "quantity": 4,
-    "core_mechanism": {
-        "description": "将基础牌的卦象上下颠倒，变为一个全新的卦来解读。"
-    },
     "metadata": {
         "image_url": "assets/images/cards/function/function_zong.png"
+    },
+    "core_mechanism": {
+        "description": "将基础牌的卦象上下颠倒，变为一个全新的卦来解读。"
     }
 }
 ```

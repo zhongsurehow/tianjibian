@@ -6,6 +6,9 @@
   "pinyin": "tun",
   "strokes": 7,
   "type": "basic",
+  "metadata": {
+    "image_url": "assets/images/cards/basic/basic_03_tun.png"
+  },
   "effect": {
     "condition": {
       "op": "IS_ENTITY_ON_BOARD",

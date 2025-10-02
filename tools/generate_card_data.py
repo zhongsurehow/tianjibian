@@ -205,15 +205,24 @@ def parse_markdown_file(filepath: Path) -> Iterator[Tuple[Dict[str, Any], str, i
 
 def generate_card_files(cards: List[Dict[str, Any]], base_output_path: Path):
     """
-    Generates individual .json files for each card in the appropriate subdirectory.
+    Generates individual .json files and a manifest file for the game client.
     """
     generated_count = 0
+    manifest = {
+        "basic": [], "function": [], "natal": [], "destiny": [],
+        "stem": [], "branch": [], "celestial": []
+    }
     print(f"\nGenerating {len(cards)} valid card files...")
+
+    # The manifest paths should be relative to the root of the data directory,
+    # which is the parent of `base_output_path`.
+    data_root = base_output_path.parent
 
     for card in cards:
         card_type = card["type"]
         card_id = card["id"]
 
+        # Determine the correct subfolder for the card type.
         if card_type in STATE_CARD_TYPES:
             if card_type == "branch":
                 subfolder_name = "branches"
@@ -226,23 +235,46 @@ def generate_card_files(cards: List[Dict[str, Any]], base_output_path: Path):
         output_path.mkdir(parents=True, exist_ok=True)
         file_path = output_path / f"{card_id}.json"
 
+        # Write the individual card JSON file.
         try:
             with file_path.open("w", encoding="utf-8") as f:
                 json.dump(card, f, ensure_ascii=False, indent=2)
             generated_count += 1
+            # Add the relative path to the manifest.
+            relative_path = file_path.relative_to(data_root).as_posix()
+            if card_type in manifest:
+                manifest[card_type].append(relative_path)
+
         except IOError as e:
             print(f"  [Error] Failed to write file {file_path}: {e}", file=sys.stderr)
         except Exception as e:
             print(f"  [Error] An unexpected error occurred writing {file_path}: {e}", file=sys.stderr)
+
+    # After generating all files, write the manifest.
+    manifest_path = base_output_path / "card_manifest.json"
+    try:
+        with manifest_path.open("w", encoding="utf-8") as f:
+            json.dump(manifest, f, ensure_ascii=False, indent=2)
+        print(f"  Successfully generated card manifest at: {manifest_path}")
+    except IOError as e:
+        print(f"  [Error] Failed to write manifest file {manifest_path}: {e}", file=sys.stderr)
 
     print(f"  Successfully generated {generated_count} files.")
 
 
 # --- 5. Main Execution ---
 
+import shutil
+
 def main():
     """Main function to orchestrate the card data generation process."""
     print("--- Starting Card Data Generation (v3.0 - Hardened Linter) ---")
+
+    # Clean the output directory to ensure a fresh build without stale files.
+    if OUTPUT_DIR.exists():
+        shutil.rmtree(OUTPUT_DIR)
+    OUTPUT_DIR.mkdir(parents=True)
+    print(f"Cleaned and recreated output directory: {OUTPUT_DIR}")
 
     schema = CardSchema(DEFAULT_SCHEMA_PATH)
     if not schema.actions:

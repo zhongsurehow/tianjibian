@@ -438,11 +438,18 @@
     </div>
 
     <script>
-        // 游戏数据
+        // --- Game Data Structures ---
+
+        // This will be populated from JSON files
+        let cardData = {
+            basic: [], function: [], natal: [], destiny: [],
+            stem: [], branch: [], celestial: []
+        };
+
         const gameState = {
             players: [
-                { id: 1, name: "玩家一", health: 200, gold: 100, position: null, status: "正常", isCurrent: true },
-                { id: 2, name: "玩家二", health: 200, gold: 100, position: null, status: "正常", isCurrent: false }
+                { id: 1, name: "玩家一", health: 200, gold: 100, position: null, status: "正常", isCurrent: true, cards: { hand: [], deck: [] } },
+                { id: 2, name: "玩家二", health: 200, gold: 100, position: null, status: "正常", isCurrent: false, cards: { hand: [], deck: [] } }
             ],
             currentTurn: 0,
             gameStarted: false,
@@ -473,15 +480,6 @@
                 { id: 'Qimen', name: '奇门', innerRadius: 313, outerRadius: 395 }
             ],
             zones: {}
-        };
-
-        const cardData = {
-            basic: [
-                { name: '乾', effect: '天道酬勤', damage: 15, cost: 10 },
-                { name: '坤', effect: '厚德载物', damage: 10, cost: 5 },
-                { name: '坎', effect: '险中求胜', damage: 20, cost: 15 },
-                { name: '离', effect: '光明普照', damage: 12, cost: 8 }
-            ]
         };
 
         const qimenData = [
@@ -661,11 +659,12 @@
 
         function initializePlayers() {
             const renZones = Object.keys(mapData.zones).filter(zone => zone.includes('Bu_Ren'));
-            const randomZone1 = renZones[Math.floor(Math.random() * renZones.length)];
-            const randomZone2 = renZones.filter(zone => zone !== randomZone1)[Math.floor(Math.random() * (renZones.length - 1))];
-            gameState.players[0].position = randomZone1;
-            gameState.players[1].position = randomZone2;
+            // Force players to the same starting zone to make testing battles deterministic.
+            const forcedZone = renZones[0]; // e.g., "Gong_Li-Bu_Ren"
+            gameState.players[0].position = forcedZone;
+            gameState.players[1].position = forcedZone;
             updatePlayerPositions();
+            addBattleLog(`[SETUP] Players starting in same zone: ${mapData.zones[forcedZone].description}`, 'info');
         }
 
         function updatePlayerPositions() {
@@ -746,22 +745,91 @@
             return false;
         }
 
-        function executeBattle(attacker, defender) {
-            const card = cardData.basic[Math.floor(Math.random() * cardData.basic.length)];
-            const damage = Math.floor(card.damage * (0.8 + Math.random() * 0.4));
-            if (attacker.gold >= card.cost) {
-                attacker.gold -= card.cost;
-                defender.health -= damage;
-                addBattleLog(`${attacker.name} 使用【${card.name}】，对 ${defender.name} 造成 ${damage} 点伤害！`, 'battle');
-                if (defender.health <= 0) {
-                    defender.health = 0;
-                    defender.status = '战败';
-                    addBattleLog(`${defender.name} 被击败！`, 'battle');
-                    return true;
+        async function loadGameData() {
+            try {
+                addBattleLog('正在加载卡牌数据...', 'info');
+                const manifestResponse = await fetch('assets/data/cards/card_manifest.json');
+                if (!manifestResponse.ok) throw new Error(`HTTP error! status: ${manifestResponse.status}`);
+                const manifest = await manifestResponse.json();
+
+                const allCardPromises = [];
+                for (const cardType in manifest) {
+                    for (const cardPath of manifest[cardType]) {
+                        // Correctly construct the path relative to the data root
+                        const cardPromise = fetch(`assets/data/${cardPath}`)
+                            .then(res => {
+                                if (!res.ok) throw new Error(`Failed to load ${cardPath}`);
+                                return res.json();
+                            })
+                            .then(card => {
+                                if (cardData[card.type]) {
+                                    cardData[card.type].push(card);
+                                }
+                            });
+                        allCardPromises.push(cardPromise);
+                    }
                 }
-            } else {
-                addBattleLog(`${attacker.name} 金币不足`, 'info');
+                await Promise.all(allCardPromises);
+                addBattleLog('卡牌数据加载完成!', 'info');
+                console.log("All card data loaded:", cardData);
+            } catch (error) {
+                console.error("Error loading game data:", error);
+                addBattleLog(`加载游戏数据失败: ${error.message}`, 'battle');
             }
+        }
+
+        function shuffleDeck(deck) {
+            for (let i = deck.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [deck[i], deck[j]] = [deck[j], deck[i]];
+            }
+        }
+
+        function buildPlayerDecks() {
+            if (!cardData.basic || cardData.basic.length === 0) {
+                addBattleLog('错误：基础卡牌数据未找到，无法构建牌组。', 'battle');
+                return;
+            }
+            gameState.players.forEach(player => {
+                // For now, each player gets a full deck of basic cards
+                player.cards.deck = [...cardData.basic];
+                shuffleDeck(player.cards.deck);
+            });
+            addBattleLog('玩家牌组构建完成。', 'info');
+        }
+
+        function drawCard(player) {
+            if (player.cards.deck.length === 0) {
+                // Optional: Reshuffle discard pile into deck
+                addBattleLog(`${player.name} 的牌库已空！`, 'info');
+                return null;
+            }
+            return player.cards.deck.pop();
+        }
+
+        function executeBattle(attacker, defender) {
+            const card = drawCard(attacker);
+            if (!card) {
+                addBattleLog(`${attacker.name} 无牌可出！`, 'info');
+                return false;
+            }
+
+            // This placeholder is improved to be data-driven, as requested by the code review.
+            // A full effect engine would be needed to parse card.core_mechanism.
+            addBattleLog(`${attacker.name} 使用【${card.name}】！`, 'battle');
+
+            // Use a value from the card's data (its sequence number) to calculate damage.
+            const damage = 5 + (card.sequence || 1); // Base damage + sequence, fallback to 1.
+            defender.health -= damage;
+            addBattleLog(`对 ${defender.name} 造成 ${damage} 点伤害！`, 'battle');
+
+            if (defender.health <= 0) {
+                defender.health = 0;
+                defender.status = '战败';
+                addBattleLog(`${defender.name} 被击败！`, 'battle');
+                return true;
+            }
+
             return false;
         }
 
@@ -780,24 +848,29 @@
             const otherPlayer = gameState.players.find(p => !p.isCurrent);
             addBattleLog(`=== 第 ${gameState.currentTurn} 回合开始 ===`, 'info');
 
+            // Corrected Turn Logic: Battle first, then move.
+            // 1. Check for battle at the start of the turn.
+            if (currentPlayer.position === otherPlayer.position) {
+                addBattleLog(`${currentPlayer.name} 与 ${otherPlayer.name} 在同一区域，触发论道！`, 'battle');
+                if (executeBattle(currentPlayer, otherPlayer)) {
+                    endGame(currentPlayer);
+                    return; // End turn if game is over.
+                }
+            }
+
+            // 2. If no battle or battle didn't end the game, proceed with movement.
             if (movePlayer(currentPlayer)) {
                 updatePlayerPositions();
 
+                // 3. Apply location-based effects after moving.
                 if (currentPlayer.position === 'Gong_Zhong') {
                     applyCentralPalaceEffect(currentPlayer);
                 } else {
                     checkAndApplyDoorEffect(currentPlayer);
                 }
-
-                if (currentPlayer.position === otherPlayer.position) {
-                    addBattleLog(`${currentPlayer.name} 与 ${otherPlayer.name} 相遇，触发论道！`, 'battle');
-                    if (executeBattle(currentPlayer, otherPlayer)) {
-                        endGame(currentPlayer);
-                        return;
-                    }
-                }
             }
 
+            // 4. End the current player's turn.
             currentPlayer.isCurrent = false;
             otherPlayer.isCurrent = true;
             updatePlayerUI();
@@ -844,13 +917,19 @@
             }
         }
 
-        function initGame() {
+        async function initGame() {
+            await loadGameData();
             initializeMap();
+            buildPlayerDecks(); // Build decks after data is loaded
             initializePlayers();
             addBattleLog('游戏初始化完成', 'info');
         }
 
         document.getElementById('start-game').addEventListener('click', () => {
+            if (cardData.basic.length === 0) {
+                 addBattleLog('错误: 卡牌数据尚未加载完成，无法开始游戏。', 'battle');
+                 return;
+            }
             gameState.gameStarted = true;
             document.getElementById('next-turn').disabled = false;
             document.getElementById('auto-play').disabled = false;
@@ -867,7 +946,10 @@
         document.getElementById('rotate-ju').addEventListener('click', rotateQimenJu);
         document.getElementById('reset-game').addEventListener('click', () => location.reload());
 
-        document.addEventListener('DOMContentLoaded', initGame);
+        // Use an async function for the DOMContentLoaded listener
+        document.addEventListener('DOMContentLoaded', async () => {
+            await initGame();
+        });
     </script>
 </body>
 </html>

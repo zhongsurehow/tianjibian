@@ -295,7 +295,8 @@ def main():
         files_to_lint = []
         for root, _, files in os.walk(base_path):
             for file in files:
-                if file.endswith('.json'):
+                # Exclude the manifest file from the linting process
+                if file.endswith('.json') and file != 'card_manifest.json':
                     files_to_lint.append(os.path.join(root, file))
 
     print(f"Found {len(files_to_lint)} JSON file(s) to lint.")
