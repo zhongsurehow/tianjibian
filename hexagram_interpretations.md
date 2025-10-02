@@ -1018,7 +1018,7 @@
         "name": "自天祐之",
         "effect": {
           "actions": [
-            { "action": "GAIN_RESOURCE", "params": { "target": "SELF", "resource": "gold", "value": 10 } }
+            { "action": "GAIN_RESOURCE", "params": { "target": "SELF", "resource": "gold", "value": 12 } }
           ]
         }
       }

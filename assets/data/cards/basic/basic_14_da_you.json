@@ -57,7 +57,7 @@
               "params": {
                 "target": "SELF",
                 "resource": "gold",
-                "value": 10
+                "value": 12
               }
             }
           ]
