@@ -36,6 +36,9 @@ DEFAULT_SCHEMA_PATH = ROOT_DIR / "card_logic_schema.md"
 INPUT_FILES = [
     ROOT_DIR / "hexagram_interpretations.md",
     ROOT_DIR / "docs" / "state_cards.md",
+    ROOT_DIR / "docs" / "function_cards.md",
+    ROOT_DIR / "docs" / "natal_cards.md",
+    ROOT_DIR / "docs" / "destiny_cards.md",
 ]
 OUTPUT_DIR = ROOT_DIR / "assets" / "data" / "cards"
 
