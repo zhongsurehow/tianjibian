@@ -63,8 +63,8 @@
             {
               "action": "SWAP_HAND_CARDS",
               "params": {
-                "target": "SELF",
-                "other_player": "OPPONENT_CHOICE_SINGLE",
+                "target_a": "SELF",
+                "target_b": "OPPONENT_CHOICE_SINGLE",
                 "count": "ALL",
                 "atomic": true
               }

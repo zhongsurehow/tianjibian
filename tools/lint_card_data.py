@@ -60,18 +60,42 @@ if not VALID_ACTIONS:
     print("Could not load actions from schema. Aborting.", file=sys.stderr)
     sys.exit(1)
 
-# Allowed parameters for each action (simplified for this linter)
-# A more robust linter would have detailed checks for each
+# Allowed parameters for each action, derived from card_logic_schema.md
 REQUIRED_ACTION_PARAMS: Dict[str, Set[str]] = {
+    # Resource Actions
     "GAIN_RESOURCE": {"target", "resource", "value"},
     "LOSE_RESOURCE": {"target", "resource", "value"},
     "PAY_COST": {"target", "resource", "value"},
     "DEAL_DAMAGE": {"target", "value"},
+    "SWAP_RESOURCES": {"target_a", "target_b", "resource"},
+    "SET_RESOURCE": {"target", "resource", "value"},
+    "TRANSFER_RESOURCE": {"from", "to", "resource", "value"},
+    # Movement Actions
     "MOVE": {"target", "value"},
+    "SWAP_POSITION": {"target_a", "target_b"},
+    # Status and Rule Actions
     "APPLY_STATUS": {"target", "status_id"},
+    "REMOVE_STATUS": {"target", "status_id"},
+    "MODIFY_RULE": {"rule_id", "scope", "mutation", "duration"},
+    # Interaction and Information Actions
     "CHOICE": {"target", "options"},
-    "EXECUTE_LATER": {"delay", "effect"}
-    # ... other actions would be defined here
+    "LOOKUP": {"target", "info_type"},
+    "INTERRUPT": {"target_action", "interrupt_type"},
+    "COPY_EFFECT": {"target", "source_effect"},
+    # Card and Deck Actions
+    "DRAW_CARD": {"target", "deck", "count"},
+    "DISCARD_CARD": {"target", "count"},
+    "SWAP_HAND_CARDS": {"target_a", "target_b", "count", "atomic"},
+    "SWAP_DISCARD_PILES": {"target_a", "target_b", "atomic"},
+    "RECOVER_CARD_FROM_DISCARD": {"target", "deck", "count"},
+    # Entity Actions
+    "CREATE_ENTITY": {"entity_type", "position"},
+    "DESTROY_ENTITY": {"target_entity_id"},
+    # Game Flow Actions
+    "SKIP_PHASE": {"phase"},
+    "PROPOSE_ALLIANCE": {"target", "duration"},
+    "EXECUTE_LATER": {"delay", "effect", "expiry_time"},
+    "TRIGGER_EVENT": {"event_id", "participants"},
 }
 
 # Allowed trigger conditions

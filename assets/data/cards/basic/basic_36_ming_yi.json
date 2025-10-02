@@ -32,7 +32,8 @@
               "action": "DISCARD_CARD",
               "params": {
                 "target": "OPPONENT_CHOICE_SINGLE",
-                "source": "CHOICE_FROM_HAND"
+                "source": "CHOICE_FROM_HAND",
+                "count": 1
               }
             }
           ]

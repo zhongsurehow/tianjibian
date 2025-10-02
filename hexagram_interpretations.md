@@ -269,7 +269,7 @@
         "name": "建侯",
         "effect": {
           "actions": [
-            { "action": "DESTROY_ENTITY", "params": { "target_entity_type": "ENTITY_TUN", "position": "SELF" } },
+            { "action": "DESTROY_ENTITY", "params": { "target_entity_id": "ENTITY_TUN" } },
             { "action": "MOVE", "params": { "target": "SELF", "destination": "ADJACENT_EMPTY", "value": 1 } },
             { "action": "CREATE_ENTITY", "params": { "entity_type": "ENTITY_OUTPOST", "position": "SELF", "owner": "SELF", "is_permanent": true, "max_instances": 1, "properties": { "name": "前哨", "on_enter_effect": { "actions": [{"action": "GAIN_RESOURCE", "params": {"target": "EVENT_SOURCE_PLAYER", "resource": "gold", "value": 2}}]}, "on_leave_effect": {"actions": [{"action": "GAIN_RESOURCE", "params": {"target": "EVENT_SOURCE_PLAYER", "resource": "gold", "value": 2}}]} } } }
           ]
@@ -279,8 +279,8 @@
         "name": "求助",
         "effect": {
           "actions": [
-            { "action": "DESTROY_ENTITY", "params": { "target_entity_type": "ENTITY_TUN", "position": "SELF" } },
-            { "action": "SWAP_HAND_CARDS", "params": { "target": "SELF", "other_player": "ALLY_FORMAL_SINGLE_CHOICE", "atomic": true } }
+            { "action": "DESTROY_ENTITY", "params": { "target_entity_id": "ENTITY_TUN" } },
+            { "action": "SWAP_HAND_CARDS", "params": { "target_a": "SELF", "target_b": "ALLY_FORMAL_SINGLE_CHOICE", "count": "ALL", "atomic": true } }
           ]
         }
       },
@@ -288,7 +288,7 @@
         "name": "甘霖",
         "effect": {
           "actions": [
-            { "action": "DESTROY_ENTITY", "params": { "target_entity_type": "ENTITY_TUN", "position": "SELF" } },
+            { "action": "DESTROY_ENTITY", "params": { "target_entity_id": "ENTITY_TUN" } },
             { "action": "GAIN_RESOURCE", "params": { "target": "SELF", "resource": "gold", "value": 15 } },
             { "action": "GAIN_RESOURCE", "params": { "target": "SELF", "resource": "YIN_YANG_GAUGE", "value": 2 } }
           ]
@@ -430,7 +430,35 @@
         "effect": {
           "actions": [
             { "action": "SKIP_PHASE", "params": { "phase": "INTERPRETATION" } },
-            { "action": "EXECUTE_LATER", "params": { "delay": "NEXT_UPKEEP_PHASE", "expiry_time": "1 ROUND", "snapshot_args": true, "effect": { "actions": [ { "action": "GAIN_RESOURCE", "params": { "target": "SELF", "resource": "gold", "value": 10 } }, { "action": "CHOICE", "params": { "target": "SELF", "options": [ { "description": "将10金币赠予盟友", "effect": { "action": "TRANSFER_RESOURCE", "params": { "from": "SELF", "to": "ALLY_FORMAL_SINGLE", "resource": "gold", "value": 10 } } } ] } } ] } } }
+            {
+              "action": "EXECUTE_LATER",
+              "params": {
+                "delay": "NEXT_UPKEEP_PHASE",
+                "expiry_time": "1 ROUND",
+                "snapshot_args": true,
+                "effect": {
+                  "actions": [
+                    { "action": "GAIN_RESOURCE", "params": { "target": "SELF", "resource": "gold", "value": 20 } },
+                    {
+                      "action": "CHOICE",
+                      "params": {
+                        "target": "SELF",
+                        "options": [
+                          {
+                            "description": "将一半（10金币）赠予盟友",
+                            "effect": {
+                              "action": "TRANSFER_RESOURCE",
+                              "params": { "from": "SELF", "to": "ALLY_FORMAL_SINGLE_CHOICE", "resource": "gold", "value": 10 }
+                            }
+                          },
+                          { "description": "保留全部金币" }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
           ]
         }
       }
@@ -943,7 +971,7 @@
         "name": "同人于宗",
         "effect": {
           "actions": [
-            { "action": "SWAP_HAND_CARDS", "params": { "target": "SELF", "other_player": "OPPONENT_CHOICE_SINGLE", "count": 1, "atomic": true } }
+            { "action": "SWAP_HAND_CARDS", "params": { "target_a": "SELF", "target_b": "OPPONENT_CHOICE_SINGLE", "count": 1, "atomic": true } }
           ]
         }
       },
@@ -2131,7 +2159,7 @@
         "name": "入于左腹",
         "effect": {
           "actions": [
-            { "action": "DISCARD_CARD", "params": { "target": "OPPONENT_CHOICE_SINGLE", "source": "CHOICE_FROM_HAND" } }
+            { "action": "DISCARD_CARD", "params": { "target": "OPPONENT_CHOICE_SINGLE", "source": "CHOICE_FROM_HAND", "count": 1 } }
           ]
         }
       },
@@ -3061,7 +3089,7 @@
         "name": "月几望",
         "effect": {
           "actions": [
-            { "action": "SWAP_HAND_CARDS", "params": { "target": "SELF", "other_player": "OPPONENT_CHOICE_SINGLE", "count": "ALL", "atomic": true } }
+            { "action": "SWAP_HAND_CARDS", "params": { "target_a": "SELF", "target_b": "OPPONENT_CHOICE_SINGLE", "count": "ALL", "atomic": true } }
           ]
         }
       }
@@ -3485,9 +3513,9 @@
 **核心机制：【水火既济】**
 - **效果：** 若你的阴阳指示条为0且五行资源平衡，你获得100胜利点。每场游戏只能成功宣告一次。
 - **爻辞变量：**
-  - **地部:** 宣告成功时，额外获得30金币。
-  - **人部:** 宣告成功时，额外获得30金币。
-  - **天部:** 宣告成功时，额外获得30金币。
+  - **地部:** 宣告成功时，获得100胜利点和30金币。
+  - **人部:** 宣告成功时，获得100胜利点和30金币。
+  - **天部:** 宣告成功时，获得100胜利点和30金币。
 ```json
 {
   "id": "basic_63_jiji",
@@ -3555,7 +3583,20 @@
       "di": {
         "name": "倒置",
         "effect": {
-          "actions": [{ "action": "MODIFY_RULE", "params": { "rule_id": "YIN_YANG_SYSTEM_REVERSED", "scope": "turn", "mutation": { "type": "SET_BOOLEAN", "value": true }, "duration": 1 } }]
+          "actions": [
+            {
+              "action": "SET_RESOURCE",
+              "params": {
+                "target": "SELF",
+                "resource": "YIN_YANG_GAUGE",
+                "value": {
+                  "op": "MULTIPLY",
+                  "a": "VAR_SELF_YIN_YANG_GAUGE",
+                  "b": -1
+                }
+              }
+            }
+          ]
         }
       },
       "ren": {

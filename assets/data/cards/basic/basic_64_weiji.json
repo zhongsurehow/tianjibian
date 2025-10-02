@@ -14,15 +14,15 @@
         "effect": {
           "actions": [
             {
-              "action": "MODIFY_RULE",
+              "action": "SET_RESOURCE",
               "params": {
-                "rule_id": "YIN_YANG_SYSTEM_REVERSED",
-                "scope": "turn",
-                "mutation": {
-                  "type": "SET_BOOLEAN",
-                  "value": true
-                },
-                "duration": 1
+                "target": "SELF",
+                "resource": "YIN_YANG_GAUGE",
+                "value": {
+                  "op": "MULTIPLY",
+                  "a": "VAR_SELF_YIN_YANG_GAUGE",
+                  "b": -1
+                }
               }
             }
           ]

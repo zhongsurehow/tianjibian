@@ -130,7 +130,7 @@
                       "params": {
                         "target": "SELF",
                         "resource": "gold",
-                        "value": 10
+                        "value": 20
                       }
                     },
                     {
@@ -139,16 +139,19 @@
                         "target": "SELF",
                         "options": [
                           {
-                            "description": "将10金币赠予盟友",
+                            "description": "将一半（10金币）赠予盟友",
                             "effect": {
                               "action": "TRANSFER_RESOURCE",
                               "params": {
                                 "from": "SELF",
-                                "to": "ALLY_FORMAL_SINGLE",
+                                "to": "ALLY_FORMAL_SINGLE_CHOICE",
                                 "resource": "gold",
                                 "value": 10
                               }
                             }
+                          },
+                          {
+                            "description": "保留全部金币"
                           }
                         ]
                       }

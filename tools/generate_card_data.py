@@ -35,6 +35,7 @@ DEFAULT_SCHEMA_PATH = ROOT_DIR / "card_logic_schema.md"
 # Define input source files and the base output directory.
 INPUT_FILES = [
     ROOT_DIR / "hexagram_interpretations.md",
+    ROOT_DIR / "docs" / "state_cards.md",
 ]
 OUTPUT_DIR = ROOT_DIR / "assets" / "data" / "cards"
 

@@ -48,8 +48,7 @@
             {
               "action": "DESTROY_ENTITY",
               "params": {
-                "target_entity_type": "ENTITY_TUN",
-                "position": "SELF"
+                "target_entity_id": "ENTITY_TUN"
               }
             },
             {
@@ -107,15 +106,15 @@
             {
               "action": "DESTROY_ENTITY",
               "params": {
-                "target_entity_type": "ENTITY_TUN",
-                "position": "SELF"
+                "target_entity_id": "ENTITY_TUN"
               }
             },
             {
               "action": "SWAP_HAND_CARDS",
               "params": {
-                "target": "SELF",
-                "other_player": "ALLY_FORMAL_SINGLE_CHOICE",
+                "target_a": "SELF",
+                "target_b": "ALLY_FORMAL_SINGLE_CHOICE",
+                "count": "ALL",
                 "atomic": true
               }
             }
@@ -129,8 +128,7 @@
             {
               "action": "DESTROY_ENTITY",
               "params": {
-                "target_entity_type": "ENTITY_TUN",
-                "position": "SELF"
+                "target_entity_id": "ENTITY_TUN"
               }
             },
             {
