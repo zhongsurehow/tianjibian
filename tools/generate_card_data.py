@@ -249,22 +249,42 @@ def main():
         print("\nCould not load schema definitions. Aborting.", file=sys.stderr)
         sys.exit(1)
 
-    all_parsed_cards = []
+    # Step 1: Parse all raw card definitions from source files.
+    all_parsed_cards_raw = []
     for file_path in INPUT_FILES:
         if not file_path.exists():
             print(f"\n[Warning] Input file not found, skipping: {file_path}", file=sys.stderr)
             continue
-        all_parsed_cards.extend(parse_markdown_file(file_path))
+        all_parsed_cards_raw.extend(parse_markdown_file(file_path))
 
-    if not all_parsed_cards:
+    if not all_parsed_cards_raw:
         print("\nNo card data found in any source file. Exiting.", file=sys.stderr)
         return
 
-    valid_cards = []
-    total_cards = len(all_parsed_cards)
-    print(f"\nFound {total_cards} card definitions. Validating against schema...")
+    # Step 2: Expand cards based on the 'quantity' field.
+    expanded_cards = []
+    for card_data, filename, line_num in all_parsed_cards_raw:
+        quantity = card_data.pop("quantity", 1)
+        if isinstance(quantity, int) and quantity > 1:
+            base_id = card_data.get("id", "unknown")
+            for i in range(1, quantity + 1):
+                # Create a deep copy to ensure nested dicts are not shared.
+                new_card = json.loads(json.dumps(card_data))
+                new_card["id"] = f"{base_id}_{i}"
+                expanded_cards.append((new_card, filename, line_num))
+        else:
+            expanded_cards.append((card_data, filename, line_num))
 
-    for card_data, filename, line_num in all_parsed_cards:
+    # Step 3: Validate all expanded cards against the schema.
+    valid_cards = []
+    total_definitions = len(all_parsed_cards_raw)
+    total_cards_expanded = len(expanded_cards)
+    print(
+        f"\nFound {total_definitions} card definitions, "
+        f"expanded to {total_cards_expanded} total cards. Validating against schema..."
+    )
+
+    for card_data, filename, line_num in expanded_cards:
         card_id = card_data.get("id", "UNKNOWN")
         errors = schema.validate(card_data)
         if errors:
@@ -277,12 +297,13 @@ def main():
         else:
             valid_cards.append(card_data)
 
-    print(f"  Validation complete. {len(valid_cards)} / {total_cards} cards are valid.")
+    print(f"  Validation complete. {len(valid_cards)} / {total_cards_expanded} cards are valid.")
 
-    if len(valid_cards) < total_cards:
+    if len(valid_cards) < total_cards_expanded:
         print("\nErrors were found. Halting file generation.", file=sys.stderr)
         sys.exit(1)
 
+    # Step 4: Generate the final JSON files.
     if valid_cards:
         generate_card_files(valid_cards, OUTPUT_DIR)
     else:

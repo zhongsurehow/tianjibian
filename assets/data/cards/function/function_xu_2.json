@@ -1,0 +1,11 @@
+{
+  "id": "function_xu_2",
+  "type": "function",
+  "name": "虚招",
+  "core_mechanism": {
+    "description": "本轮免疫惩罚，但亦无奖励。之后从基础牌库补充2张牌。"
+  },
+  "metadata": {
+    "image_url": "assets/images/cards/function/function_xu.png"
+  }
+}

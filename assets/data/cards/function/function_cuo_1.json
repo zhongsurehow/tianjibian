@@ -1,0 +1,11 @@
+{
+  "id": "function_cuo_1",
+  "type": "function",
+  "name": "错卦",
+  "core_mechanism": {
+    "description": "将基础牌的每一个爻都进行阴阳反转，变为一个全新的卦来解读。"
+  },
+  "metadata": {
+    "image_url": "assets/images/cards/function/function_cuo.png"
+  }
+}
